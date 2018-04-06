@@ -42,7 +42,7 @@ APPLICATION_INFO::~APPLICATION_INFO()
 
 HRESULT
 APPLICATION_INFO::Initialize(
-    _In_ ASPNETCORE_CONFIG   *pConfiguration,
+    _In_ REQUESTHANDLER_CONFIG   *pConfiguration,
     _In_ FILE_WATCHER        *pFileWatcher
 )
 {

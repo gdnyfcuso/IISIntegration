@@ -172,7 +172,6 @@
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="iapplication.h" />
-    <ClInclude Include="aspnetcoreconfig.h" />
     <ClInclude Include="debugutil.h" />
     <ClInclude Include="disconnectcontext.h" />
     <ClInclude Include="environmentvariablehash.h" />
@@ -186,7 +185,7 @@
     <ClInclude Include="utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="aspnetcoreconfig.cxx" />
+    <ClCompile Include="application.cpp" />
     <ClCompile Include="fx_ver.cxx" />
     <ClCompile Include="hostfxr_utility.cpp" />
     <ClCompile Include="SRWLockWrapper.cpp" />

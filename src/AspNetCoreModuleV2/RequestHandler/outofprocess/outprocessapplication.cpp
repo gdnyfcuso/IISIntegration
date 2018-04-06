@@ -1,7 +1,7 @@
 #include "..\precomp.hxx"
 
 OUT_OF_PROCESS_APPLICATION::OUT_OF_PROCESS_APPLICATION(
-    ASPNETCORE_CONFIG*  pConfig) :
+    REQUESTHANDLER_CONFIG*  pConfig) :
     m_pConfig(pConfig)
 {
     m_status = APPLICATION_STATUS::RUNNING;

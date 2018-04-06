@@ -4,7 +4,7 @@ IN_PROCESS_APPLICATION*  IN_PROCESS_APPLICATION::s_Application = NULL;
 
 IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
     IHttpServer*        pHttpServer,
-    ASPNETCORE_CONFIG*  pConfig) :
+    REQUESTHANDLER_CONFIG*  pConfig) :
     m_pHttpServer(pHttpServer),
     m_ProcessExitCode(0),
     m_hLogFileHandle(INVALID_HANDLE_VALUE),

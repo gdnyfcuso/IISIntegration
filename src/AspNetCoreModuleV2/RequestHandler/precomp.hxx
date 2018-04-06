@@ -52,7 +52,6 @@
 #include "..\CommonLib\fx_ver.h"
 #include "..\CommonLib\debugutil.h"
 #include "..\CommonLib\requesthandler.h"
-#include "..\CommonLib\aspnetcoreconfig.h"
 #include "..\CommonLib\utility.h"
 #include "..\CommonLib\application.h"
 #include "..\CommonLib\resources.h"
@@ -73,6 +72,7 @@
 #include ".\outofprocess\outprocessapplication.h"
 #include ".\outofprocess\winhttphelper.h"
 #include ".\outofprocess\outprocessapplication.h"
+#include ".\requesthandler_config.h"
 
 #ifdef max
 #undef max

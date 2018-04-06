@@ -213,6 +213,7 @@
   <ItemGroup>
     <ClInclude Include="Inc\applicationinfo.h" />
     <ClInclude Include="Inc\appoffline.h" />
+    <ClInclude Include="Inc\aspnetcore_shim_config.h" />
     <ClInclude Include="inc\globalmodule.h" />
     <ClInclude Include="Inc\applicationmanager.h" />
     <ClInclude Include="Inc\filewatcher.h" />
@@ -222,6 +223,7 @@
   <ItemGroup>
     <ClCompile Include="Src\applicationinfo.cpp" />
     <ClCompile Include="Src\applicationmanager.cxx" />
+    <ClCompile Include="src\aspnetcore_shim_config.cpp" />
     <ClCompile Include="Src\dllmain.cpp" />
     <ClCompile Include="Src\filewatcher.cxx" />
     <ClCompile Include="src\globalmodule.cpp" />

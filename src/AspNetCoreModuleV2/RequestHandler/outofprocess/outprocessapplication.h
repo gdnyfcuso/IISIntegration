@@ -4,7 +4,7 @@ class OUT_OF_PROCESS_APPLICATION : public APPLICATION
 {
 
 public:
-    OUT_OF_PROCESS_APPLICATION(ASPNETCORE_CONFIG  *pConfig);
+    OUT_OF_PROCESS_APPLICATION(REQUESTHANDLER_CONFIG  *pConfig);
 
     __override
     ~OUT_OF_PROCESS_APPLICATION() override;
@@ -44,5 +44,5 @@ private:
     PROCESS_MANAGER * m_pProcessManager;
     SRWLOCK           rwlock;
 
-    ASPNETCORE_CONFIG*              m_pConfig;
+    REQUESTHANDLER_CONFIG*              m_pConfig;
 };

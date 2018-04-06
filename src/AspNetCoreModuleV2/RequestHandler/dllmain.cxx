@@ -276,7 +276,7 @@ HRESULT
 __stdcall
 CreateApplication(
     _In_  IHttpServer        *pServer,
-    _In_  ASPNETCORE_CONFIG  *pConfig,
+    _In_  REQUESTHANDLER_CONFIG  *pConfig,
     _Out_ IAPPLICATION       **ppApplication
 )
 {

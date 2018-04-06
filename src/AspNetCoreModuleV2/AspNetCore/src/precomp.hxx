@@ -102,7 +102,6 @@ inline bool IsSpace(char ch)
 #include <time.h>
 
 #include "..\..\CommonLib\environmentvariablehash.h"
-#include "..\..\CommonLib\aspnetcoreconfig.h"
 #include "..\..\CommonLib\hostfxr_utility.h"
 #include "..\..\CommonLib\iapplication.h"
 #include "..\..\CommonLib\utility.h"
@@ -111,6 +110,8 @@ inline bool IsSpace(char ch)
 #include "..\..\CommonLib\resources.h"
 #include "..\..\CommonLib\aspnetcore_msg.h"
 //#include "aspnetcore_event.h"
+#include "aspnetcore_shim_config.h"
+
 #include "appoffline.h"
 #include "filewatcher.h"
 #include "applicationinfo.h"

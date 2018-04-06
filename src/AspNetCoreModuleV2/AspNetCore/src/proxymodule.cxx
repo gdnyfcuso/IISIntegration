@@ -78,7 +78,7 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
 )
 {
     HRESULT hr = S_OK;
-    ASPNETCORE_CONFIG     *pConfig = NULL;
+    ASPNETCORE_SHIM_CONFIG *pConfig = NULL;
     APPLICATION_MANAGER   *pApplicationManager = NULL;
     REQUEST_NOTIFICATION_STATUS retVal = RQ_NOTIFICATION_CONTINUE;
     IAPPLICATION* pApplication = NULL;
@@ -89,7 +89,7 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
         goto Finished;
     }
 
-    hr = ASPNETCORE_CONFIG::GetConfig(g_pHttpServer, g_pModuleId, pHttpContext, g_hEventLog, &pConfig);
+    hr = ASPNETCORE_SHIM_CONFIG::GetConfig(g_pHttpServer, g_pModuleId, pHttpContext, g_hEventLog, &pConfig);
     if (FAILED(hr))
     {
         goto Finished;
