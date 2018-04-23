@@ -25,6 +25,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
                 SiteName = "HttpTestSite",
                 TargetFramework = "netcoreapp2.1",
                 ApplicationType = ApplicationType.Portable,
+                PreservePublishedApplicationForDebugging = true,
                 Configuration =
 #if DEBUG
                         "Debug"

@@ -32,7 +32,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
 
                 var ancmConfigPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                    "IIS Express", "config", "schema", "aspnetcore_schema.xml");
+                    "IIS Express", "config", "schema", "aspnetcore_schema_v2.xml");
 
                 if (!File.Exists(ancmConfigPath))
                 {
