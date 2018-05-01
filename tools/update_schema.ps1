@@ -1,6 +1,7 @@
 <#
 .DESCRIPTION
-Updates aspnetcore_schema_v2.xml to the latest version.
+Updates aspnetcore_schema.xml to the latest version.
+Updates aspnetcore_schema.xml to the latest version.
 Requires admin privileges.
 #>
 [cmdletbinding(SupportsShouldProcess = $true)]
@@ -9,7 +10,8 @@ param()
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 1
 
-$schemaSource = Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV2\AspNetCore\aspnetcore_schema_v2.xml"
+$schemaV1Source = Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV1\AspNetCore\aspnetcore_schema.xml"
+$schemaV2Source = Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV2\AspNetCore\aspnetcore_schema_v2.xml"
 [bool]$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
 if (-not $isAdmin -and -not $WhatIfPreference) {
@@ -33,18 +35,31 @@ if (-not $isAdmin -and -not $WhatIfPreference) {
     }
 }
 
-$destinations = @(
+$destinationsV1 = @(
+    "${env:ProgramFiles(x86)}\IIS Express\config\schema\aspnetcore_schema.xml",
+    "${env:ProgramFiles}\IIS Express\config\schema\aspnetcore_schema.xml",
+    "${env:windir}\system32\inetsrv\config\schema\aspnetcore_schema.xml"
+) | Get-Unique
+
+$destinationsV2 = @(
     "${env:ProgramFiles(x86)}\IIS Express\config\schema\aspnetcore_schema_v2.xml",
     "${env:ProgramFiles}\IIS Express\config\schema\aspnetcore_schema_v2.xml",
     "${env:windir}\system32\inetsrv\config\schema\aspnetcore_schema_v2.xml"
 ) | Get-Unique
 
-
-foreach ($dest in $destinations) {
+foreach ($dest in $destinationsV1) {
     if ($PSCmdlet.ShouldProcess($dest, "Replace file")) {
         Write-Host "Updated $dest"
         Move-Item $dest "${dest}.bak" -ErrorAction Ignore
-        Copy-Item $schemaSource $dest
+        Copy-Item $schemaV1Source $dest
+    }
+}
+
+foreach ($dest in $destinationsV2) {
+    if ($PSCmdlet.ShouldProcess($dest, "Replace file")) {
+        Write-Host "Updated $dest"
+        Move-Item $dest "${dest}.bak" -ErrorAction Ignore
+        Copy-Item $schemaV2Source $dest
     }
 }
 
