@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
 
                 using (var deployer = ApplicationDeployerFactory.Create(deploymentParameters, loggerFactory))
                 {
-                    var deploymentResult = await deployer.DeployAsync();
+                    var deploymentResult = await Helpers.DeployApplication(deployer, ancmVersion);
                     var httpClient = deploymentResult.HttpClient;
                     httpClient.Timeout = TimeSpan.FromSeconds(5);
 
