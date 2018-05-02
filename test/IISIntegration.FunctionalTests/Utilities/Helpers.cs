@@ -38,15 +38,5 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
             element.SetAttributeValue(key, value);
             config.Save(webConfigFile);
         }
-
-        public static async Task<DeploymentResult> DeployApplication(IApplicationDeployer deployer, string ancmVersion = "V2")
-        {
-            var deploymentResult = await deployer.DeployAsync();
-            if (ancmVersion == "V2")
-            {
-                ModifyAspNetCoreSectionInWebConfig(deploymentResult, "modules", "AspNetCoreModuleV2");
-            }
-            return deploymentResult;
-        }
     }
 }

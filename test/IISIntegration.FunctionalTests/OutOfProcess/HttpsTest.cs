@@ -71,7 +71,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
 
                 using (var deployer = ApplicationDeployerFactory.Create(deploymentParameters, loggerFactory))
                 {
-                    var deploymentResult = await Helpers.DeployApplication(deployer, ancmVersion);
+                    var deploymentResult = await deployer.DeployAsync();
 
                     var handler = new HttpClientHandler();
                     handler.ServerCertificateCustomValidationCallback = (a, b, c, d) => true;
@@ -165,7 +165,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration.FunctionalTests
 
                 using (var deployer = ApplicationDeployerFactory.Create(deploymentParameters, loggerFactory))
                 {
-                    var deploymentResult = await Helpers.DeployApplication(deployer, ancmVersion);
+                    var deploymentResult = await deployer.DeployAsync();
                     var handler = new HttpClientHandler();
                     handler.ServerCertificateCustomValidationCallback = (a, b, c, d) => true;
                     handler.ClientCertificateOptions = ClientCertificateOption.Manual;
