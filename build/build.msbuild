@@ -10,11 +10,6 @@
    </ItemGroup> 
  
    <Target Name="Build">
-      <Exec Command="$(PowerShellExe) -NonInteractive -executionpolicy Unrestricted 
-                 -command { 
-                          .\..\tools\update_schema.ps1 
-                          }" />
-
      <MSBuild Targets="$(BuildTargets)" 
        Projects="@(Projects)" 
        Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" /> 

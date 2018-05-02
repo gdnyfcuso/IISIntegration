@@ -10,8 +10,16 @@ param()
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 1
 
-$schemaV1Source = Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV1\AspNetCore\aspnetcore_schema.xml"
-$schemaV2Source = Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV2\AspNetCore\aspnetcore_schema_v2.xml"
+$ancmSchemaFiles = @(
+    "aspnetcore_schema.xml",
+    "aspnetcore_schema_v2.xml"
+)
+
+$ancmSchemaFileLocations = @(
+    @(Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV1\AspNetCore\aspnetcore_schema.xml"),
+    @(Resolve-Path "$PSScriptRoot\..\src\AspNetCoreModuleV2\AspNetCore\aspnetcore_schema_v2.xml")
+)
+
 [bool]$isAdmin = ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
 
 if (-not $isAdmin -and -not $WhatIfPreference) {
@@ -35,31 +43,22 @@ if (-not $isAdmin -and -not $WhatIfPreference) {
     }
 }
 
-$destinationsV1 = @(
-    "${env:ProgramFiles(x86)}\IIS Express\config\schema\aspnetcore_schema.xml",
-    "${env:ProgramFiles}\IIS Express\config\schema\aspnetcore_schema.xml",
-    "${env:windir}\system32\inetsrv\config\schema\aspnetcore_schema.xml"
-) | Get-Unique
+for ($i=0; $i -lt $ancmSchemaFiles.Length; $i++)
+{
+    $schemaFile = $ancmSchemaFiles[$i]
+    $schemaSource = $ancmSchemaFileLocations[$i]
 
-$destinationsV2 = @(
-    "${env:ProgramFiles(x86)}\IIS Express\config\schema\aspnetcore_schema_v2.xml",
-    "${env:ProgramFiles}\IIS Express\config\schema\aspnetcore_schema_v2.xml",
-    "${env:windir}\system32\inetsrv\config\schema\aspnetcore_schema_v2.xml"
-) | Get-Unique
+    $destinations = @(
+        "${env:ProgramFiles(x86)}\IIS Express\config\schema\${schemaFile}",
+        "${env:ProgramFiles}\IIS Express\config\schema\${schemaFile}",
+        "${env:windir}\system32\inetsrv\config\schema\${schemaFile}"
+    )
 
-foreach ($dest in $destinationsV1) {
-    if ($PSCmdlet.ShouldProcess($dest, "Replace file")) {
-        Write-Host "Updated $dest"
-        Move-Item $dest "${dest}.bak" -ErrorAction Ignore
-        Copy-Item $schemaV1Source $dest
+    foreach ($dest in $destinations) {
+        if ($PSCmdlet.ShouldProcess($dest, "Replace file")) {
+            Write-Host "Updated $dest"
+            Move-Item $dest "${dest}.bak" -ErrorAction Ignore
+            Copy-Item $schemaSource $dest
+        }
     }
 }
-
-foreach ($dest in $destinationsV2) {
-    if ($PSCmdlet.ShouldProcess($dest, "Replace file")) {
-        Write-Host "Updated $dest"
-        Move-Item $dest "${dest}.bak" -ErrorAction Ignore
-        Copy-Item $schemaV2Source $dest
-    }
-}
-
