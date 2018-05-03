@@ -276,19 +276,22 @@ HRESULT
 __stdcall
 CreateApplication(
     _In_  IHttpServer        *pServer,
-    _In_  REQUESTHANDLER_CONFIG  *pConfig,
+    _In_  IHttpContext       *pHttpContext,
     _Out_ IAPPLICATION       **ppApplication
 )
 {
     HRESULT      hr = S_OK;
     IAPPLICATION *pApplication = NULL;
+    REQUESTHANDLER_CONFIG *pConfig = NULL;
 
     // Initialze some global variables here
     InitializeGlobalConfiguration(pServer);
 
+    hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpContext, g_hEventLog, &pConfig);
+
     if (pConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
     {
-        pApplication = new IN_PROCESS_APPLICATION(pServer);
+        pApplication = new IN_PROCESS_APPLICATION(pServer, pConfig);
         if (pApplication == NULL)
         {
             hr = HRESULT_FROM_WIN32(ERROR_OUTOFMEMORY);
@@ -330,3 +333,4 @@ CreateApplication(
 Finished:
     return hr;
 }
+

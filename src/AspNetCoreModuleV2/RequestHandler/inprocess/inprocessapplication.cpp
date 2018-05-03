@@ -3,7 +3,8 @@
 IN_PROCESS_APPLICATION*  IN_PROCESS_APPLICATION::s_Application = NULL;
 
 IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
-    IHttpServer*        pHttpServer) :
+    IHttpServer*        pHttpServer,
+    REQUESTHANDLER_CONFIG *pConfig) :
     m_pHttpServer(pHttpServer),
     m_ProcessExitCode(0),
     m_hLogFileHandle(INVALID_HANDLE_VALUE),
@@ -21,8 +22,9 @@ IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
     // If so, I don't think there is much to do here.
     DBG_ASSERT(pHttpServer != NULL);
     DBG_ASSERT(pConfig != NULL);
-    InitializeSRWLock(&m_srwLock);
 
+    InitializeSRWLock(&m_srwLock);
+    m_pConfig = pConfig;
     // TODO we can probably initialized as I believe we are the only ones calling recycle.
     m_status = APPLICATION_STATUS::STARTING;
 }
@@ -999,31 +1001,17 @@ IN_PROCESS_APPLICATION::QueryConfig() const
 HRESULT
 IN_PROCESS_APPLICATION::CreateHandler(
     _In_  IHttpContext       *pHttpContext,
-    _In_  HTTP_MODULE_ID     *pModuleId,
     _Out_ IREQUEST_HANDLER   **pRequestHandler)
 {
     HRESULT hr = S_OK;
     IREQUEST_HANDLER* pHandler = NULL;
-
-    // To create the RequestHandler configuration, we need a pHttpContext,
-    // which isn't part of the api of creating the application.
-    // So create the configuration here.
-    if (m_pConfig == NULL)
-    {
-        AcquireSRWLockExclusive(&m_srwLock);
-        if (m_pConfig == NULL)
-        {
-            hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(m_pHttpServer, pModuleId, pHttpContext, g_hEventLog, &m_pConfig);
-        }
-        ReleaseSRWLockExclusive(&m_srwLock);
-    }
 
     if (FAILED(hr))
     {
         return hr;
     }
 
-    pHandler = new IN_PROCESS_HANDLER(pHttpContext, pModuleId, this);
+    pHandler = new IN_PROCESS_HANDLER(pHttpContext, this);
 
     if (pHandler == NULL)
     {

@@ -177,7 +177,7 @@ APPLICATION_INFO::UpdateAppOfflineFileHandle()
 }
 
 HRESULT
-APPLICATION_INFO::EnsureApplicationCreated()
+APPLICATION_INFO::EnsureApplicationCreated(IHttpContext *pHttpContext)
 {
     HRESULT             hr = S_OK;
     BOOL                fLocked = FALSE;
@@ -222,7 +222,7 @@ APPLICATION_INFO::EnsureApplicationCreated()
                 goto Finished;
             }
 
-            hr = m_pfnAspNetCoreCreateApplication(m_pServer, &pApplication);
+            hr = m_pfnAspNetCoreCreateApplication(m_pServer, pHttpContext, &pApplication);
             if (FAILED(hr))
             {
                 goto Finished;

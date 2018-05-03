@@ -143,7 +143,7 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
     }
 
     // make sure assmebly is loaded and application is created
-    hr = m_pApplicationInfo->EnsureApplicationCreated();
+    hr = m_pApplicationInfo->EnsureApplicationCreated(pHttpContext);
     if (FAILED(hr))
     {
         goto Finished;
@@ -163,7 +163,6 @@ ASPNET_CORE_PROXY_MODULE::OnExecuteRequestHandler(
 
     // Create RequestHandler and process the request
     hr = pApplication->CreateHandler(pHttpContext,
-                    (HTTP_MODULE_ID*) &g_pModuleId,
                     &m_pHandler);
 
     if (FAILED(hr))

@@ -84,12 +84,11 @@ OUT_OF_PROCESS_APPLICATION::Recycle()
 HRESULT
 OUT_OF_PROCESS_APPLICATION::CreateHandler(
     _In_  IHttpContext       *pHttpContext,
-    _In_  HTTP_MODULE_ID     *pModuleId,
     _Out_ IREQUEST_HANDLER   **pRequestHandler)
 {
     HRESULT hr = S_OK;
     IREQUEST_HANDLER* pHandler = NULL;
-    pHandler = new FORWARDING_HANDLER(pHttpContext, pModuleId, this);
+    pHandler = new FORWARDING_HANDLER(pHttpContext, this);
 
     if (pHandler == NULL)
     {

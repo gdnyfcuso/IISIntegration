@@ -60,6 +60,7 @@
 #include "disconnectcontext.h"
 #include "environmentvariablehelpers.h"
 #include "sttimer.h"
+#include ".\requesthandler_config.h"
 #include ".\inprocess\InProcessHandler.h"
 #include ".\inprocess\inprocessapplication.h"
 #include ".\outofprocess\responseheaderhash.h"
@@ -72,7 +73,6 @@
 #include ".\outofprocess\outprocessapplication.h"
 #include ".\outofprocess\winhttphelper.h"
 #include ".\outofprocess\outprocessapplication.h"
-#include ".\requesthandler_config.h"
 
 #ifdef max
 #undef max

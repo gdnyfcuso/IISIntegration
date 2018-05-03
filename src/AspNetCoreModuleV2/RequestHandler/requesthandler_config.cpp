@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "requesthandler_config.h"
-#include "debugutil.h"
 
 REQUESTHANDLER_CONFIG::~REQUESTHANDLER_CONFIG()
 {
@@ -24,7 +23,6 @@ REQUESTHANDLER_CONFIG::~REQUESTHANDLER_CONFIG()
 HRESULT
 REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(
     _In_  IHttpServer             *pHttpServer,
-    _In_  HTTP_MODULE_ID           pModuleId,
     _In_  IHttpContext            *pHttpContext,
     _In_  HANDLE                   hEventLog,
     _Out_ REQUESTHANDLER_CONFIG  **ppAspNetCoreConfig
@@ -81,8 +79,6 @@ REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(
         pRequestHandlerConfig->SetHostFxrArguments(dwArgCount, pwzArgv);
     }
 
-    DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO,
-        "REQUESTHANDLER_CONFIG::GetConfig, set config to ModuleContext");
     // set appliction info here instead of inside Populate()
     // as the destructor will delete the backend process
     hr = pRequestHandlerConfig->QueryApplicationPath()->Copy(pHttpApplication->GetApplicationId());

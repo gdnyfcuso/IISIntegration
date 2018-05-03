@@ -3,8 +3,7 @@
 
 #pragma once
 
-#include "stdafx.h"
-
+class IREQUEST_HANDLER;
 enum APPLICATION_STATUS
 {
     UNKNOWN = 0,
@@ -44,6 +43,5 @@ public:
     HRESULT
     CreateHandler(
         _In_  IHttpContext       *pHttpContext,
-        _In_  HTTP_MODULE_ID     *pModuleId,
         _Out_ IREQUEST_HANDLER   **pRequestHandler) = 0;
 };
