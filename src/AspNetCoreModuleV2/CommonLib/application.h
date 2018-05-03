@@ -4,6 +4,7 @@
 #pragma once
 
 #include "stdafx.h"
+class  REQUESTHANDLER_CONFIG;
 
 class APPLICATION : public IAPPLICATION
 {
