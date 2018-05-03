@@ -3,8 +3,7 @@
 IN_PROCESS_APPLICATION*  IN_PROCESS_APPLICATION::s_Application = NULL;
 
 IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
-    IHttpServer*        pHttpServer,
-    REQUESTHANDLER_CONFIG*  pConfig) :
+    IHttpServer*        pHttpServer) :
     m_pHttpServer(pHttpServer),
     m_ProcessExitCode(0),
     m_hLogFileHandle(INVALID_HANDLE_VALUE),
@@ -16,8 +15,7 @@ IN_PROCESS_APPLICATION::IN_PROCESS_APPLICATION(
     m_fInitialized(FALSE),
     m_fShutdownCalledFromNative(FALSE),
     m_fShutdownCalledFromManaged(FALSE),
-    m_srwLock(),
-    m_pConfig(pConfig)
+    m_srwLock()
 {
     // is it guaranteed that we have already checked app offline at this point?
     // If so, I don't think there is much to do here.
@@ -36,6 +34,12 @@ IN_PROCESS_APPLICATION::~IN_PROCESS_APPLICATION()
         m_Timer.CancelTimer();
         CloseHandle(m_hLogFileHandle);
         m_hLogFileHandle = INVALID_HANDLE_VALUE;
+    }
+
+    if (m_pConfig != NULL)
+    {
+        delete m_pConfig;
+        m_pConfig = NULL;
     }
 
     m_hThread = NULL;
@@ -1000,6 +1004,25 @@ IN_PROCESS_APPLICATION::CreateHandler(
 {
     HRESULT hr = S_OK;
     IREQUEST_HANDLER* pHandler = NULL;
+
+    // To create the RequestHandler configuration, we need a pHttpContext,
+    // which isn't part of the api of creating the application.
+    // So create the configuration here.
+    if (m_pConfig == NULL)
+    {
+        AcquireSRWLockExclusive(&m_srwLock);
+        if (m_pConfig == NULL)
+        {
+            hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(m_pHttpServer, pModuleId, pHttpContext, g_hEventLog, &m_pConfig);
+        }
+        ReleaseSRWLockExclusive(&m_srwLock);
+    }
+
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
     pHandler = new IN_PROCESS_HANDLER(pHttpContext, pModuleId, this);
 
     if (pHandler == NULL)

@@ -1,4 +1,26 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 #pragma once
+#define CS_ROOTWEB_CONFIG                                L"MACHINE/WEBROOT/APPHOST/"
+#define CS_ROOTWEB_CONFIG_LEN                            _countof(CS_ROOTWEB_CONFIG)-1
+#define CS_ASPNETCORE_SECTION                            L"system.webServer/aspNetCore"
+#define CS_ASPNETCORE_PROCESS_EXE_PATH                   L"processPath"
+#define CS_ASPNETCORE_PROCESS_ARGUMENTS                  L"arguments"
+#define CS_ASPNETCORE_ENVIRONMENT_VARIABLE_NAME          L"name"
+#define CS_ASPNETCORE_ENVIRONMENT_VARIABLE_VALUE         L"value"
+#define CS_ASPNETCORE_RECYCLE_ON_FILE_CHANGE_FILE        L"file"
+#define CS_ASPNETCORE_RECYCLE_ON_FILE_CHANGE_FILE_PATH   L"path"
+#define CS_ASPNETCORE_HOSTING_MODEL                      L"hostingModel"
+
+#define MAX_RAPID_FAILS_PER_MINUTE 100
+#define MILLISECONDS_IN_ONE_SECOND 1000
+#define MIN_PORT                   1025
+#define MAX_PORT                   48000
+
+#define TIMESPAN_IN_MILLISECONDS(x)  ((x)/((LONGLONG)(10000)))
+#define TIMESPAN_IN_SECONDS(x)       ((TIMESPAN_IN_MILLISECONDS(x))/((LONGLONG)(1000)))
+#define TIMESPAN_IN_MINUTES(x)       ((TIMESPAN_IN_SECONDS(x))/((LONGLONG)(60)))
 
 enum APP_HOSTING_MODEL
 {
@@ -10,10 +32,10 @@ enum APP_HOSTING_MODEL
 class ASPNETCORE_SHIM_CONFIG : IHttpStoredContext
 {
 public:
-    ASPNETCORE_SHIM_CONFIG();
     virtual
         ~ASPNETCORE_SHIM_CONFIG();
 
+    static
     HRESULT
         GetConfig(
             _In_  IHttpServer             *pHttpServer,
@@ -142,28 +164,20 @@ public:
     }
 
 private:
+    ASPNETCORE_SHIM_CONFIG() :
+        m_cRefs(1),
+        m_hostingModel(HOSTING_UNKNOWN),
+        m_ppStrArguments(NULL)
+    {
+    }
+
     mutable LONG           m_cRefs;
-    DWORD                  m_dwRequestTimeoutInMS;
-    DWORD                  m_dwStartupTimeLimitInMS;
-    DWORD                  m_dwShutdownTimeLimitInMS;
-    DWORD                  m_dwRapidFailsPerMinute;
-    DWORD                  m_dwProcessesPerApplication;
     STRU                   m_struArguments;
     STRU                   m_struProcessPath;
-    STRU                   m_struStdoutLogFile;
     STRU                   m_struApplication;
     STRU                   m_struApplicationPhysicalPath;
-    STRU                   m_struApplicationVirtualPath;
     STRU                   m_struConfigPath;
-    BOOL                   m_fStdoutLogEnabled;
-    BOOL                   m_fForwardWindowsAuthToken;
-    BOOL                   m_fDisableStartUpErrorPage;
-    BOOL                   m_fWindowsAuthEnabled;
-    BOOL                   m_fBasicAuthEnabled;
-    BOOL                   m_fAnonymousAuthEnabled;
-    BOOL                   m_fWebSocketEnabled;
     APP_HOSTING_MODEL      m_hostingModel;
-    ENVIRONMENT_VAR_HASH*  m_pEnvironmentVariables;
     STRU                   m_struHostFxrLocation;
     PWSTR*                 m_ppStrArguments;
     DWORD                  m_dwArgc;

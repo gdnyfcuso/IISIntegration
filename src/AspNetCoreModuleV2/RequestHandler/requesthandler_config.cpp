@@ -21,39 +21,18 @@ REQUESTHANDLER_CONFIG::~REQUESTHANDLER_CONFIG()
     }
 }
 
-VOID
-REQUESTHANDLER_CONFIG::ReferenceConfiguration(
-    VOID
-) const
-{
-    InterlockedIncrement(&m_cRefs);
-}
-
-VOID
-REQUESTHANDLER_CONFIG::DereferenceConfiguration(
-    VOID
-) const
-{
-    DBG_ASSERT(m_cRefs != 0);
-    LONG cRefs = 0;
-    if ((cRefs = InterlockedDecrement(&m_cRefs)) == 0)
-    {
-        delete this;
-    }
-}
-
 HRESULT
-REQUESTHANDLER_CONFIG::GetConfig(
+REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(
     _In_  IHttpServer             *pHttpServer,
     _In_  HTTP_MODULE_ID           pModuleId,
     _In_  IHttpContext            *pHttpContext,
     _In_  HANDLE                   hEventLog,
-    _Out_ REQUESTHANDLER_CONFIG      **ppAspNetCoreConfig
+    _Out_ REQUESTHANDLER_CONFIG  **ppAspNetCoreConfig
 )
 {
     HRESULT                 hr = S_OK;
     IHttpApplication       *pHttpApplication = pHttpContext->GetApplication();
-    REQUESTHANDLER_CONFIG      *pAspNetCoreConfig = NULL;
+    REQUESTHANDLER_CONFIG   *pRequestHandlerConfig = NULL;
     STRU                    struHostFxrDllLocation;
     PWSTR*                  pwzArgv;
     DWORD                   dwArgCount;
@@ -66,38 +45,27 @@ REQUESTHANDLER_CONFIG::GetConfig(
 
     *ppAspNetCoreConfig = NULL;
 
-    // potential bug if user sepcific config at virtual dir level
-    pAspNetCoreConfig = (REQUESTHANDLER_CONFIG*)
-        pHttpApplication->GetModuleContextContainer()->GetModuleContext(pModuleId);
-
-    if (pAspNetCoreConfig != NULL)
-    {
-        *ppAspNetCoreConfig = pAspNetCoreConfig;
-        pAspNetCoreConfig = NULL;
-        goto Finished;
-    }
-
-    pAspNetCoreConfig = new REQUESTHANDLER_CONFIG;
-    if (pAspNetCoreConfig == NULL)
+    pRequestHandlerConfig = new REQUESTHANDLER_CONFIG;
+    if (pRequestHandlerConfig == NULL)
     {
         hr = E_OUTOFMEMORY;
         goto Finished;
     }
 
-    hr = pAspNetCoreConfig->Populate(pHttpServer, pHttpContext);
+    hr = pRequestHandlerConfig->Populate(pHttpServer, pHttpContext);
     if (FAILED(hr))
     {
         goto Finished;
     }
 
     // Modify config for inprocess.
-    if (pAspNetCoreConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
+    if (pRequestHandlerConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
     {
         if (FAILED(hr = HOSTFXR_UTILITY::GetHostFxrParameters(
             hEventLog,
-            pAspNetCoreConfig->QueryProcessPath()->QueryStr(),
-            pAspNetCoreConfig->QueryApplicationPhysicalPath()->QueryStr(),
-            pAspNetCoreConfig->QueryArguments()->QueryStr(),
+            pRequestHandlerConfig->QueryProcessPath()->QueryStr(),
+            pRequestHandlerConfig->QueryApplicationPhysicalPath()->QueryStr(),
+            pRequestHandlerConfig->QueryArguments()->QueryStr(),
             &struHostFxrDllLocation,
             &dwArgCount,
             &pwzArgv)))
@@ -105,57 +73,33 @@ REQUESTHANDLER_CONFIG::GetConfig(
             goto Finished;
         }
 
-        if (FAILED(hr = pAspNetCoreConfig->SetHostFxrFullPath(struHostFxrDllLocation.QueryStr())))
+        if (FAILED(hr = pRequestHandlerConfig->SetHostFxrFullPath(struHostFxrDllLocation.QueryStr())))
         {
             goto Finished;
         }
 
-        pAspNetCoreConfig->SetHostFxrArguments(dwArgCount, pwzArgv);
+        pRequestHandlerConfig->SetHostFxrArguments(dwArgCount, pwzArgv);
     }
 
-    hr = pHttpApplication->GetModuleContextContainer()->
-        SetModuleContext(pAspNetCoreConfig, pModuleId);
+    DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO,
+        "REQUESTHANDLER_CONFIG::GetConfig, set config to ModuleContext");
+    // set appliction info here instead of inside Populate()
+    // as the destructor will delete the backend process
+    hr = pRequestHandlerConfig->QueryApplicationPath()->Copy(pHttpApplication->GetApplicationId());
     if (FAILED(hr))
     {
-        if (hr == HRESULT_FROM_WIN32(ERROR_ALREADY_ASSIGNED))
-        {
-            delete pAspNetCoreConfig;
-
-            pAspNetCoreConfig = (REQUESTHANDLER_CONFIG*)pHttpApplication->
-                GetModuleContextContainer()->
-                GetModuleContext(pModuleId);
-
-            _ASSERT(pAspNetCoreConfig != NULL);
-
-            hr = S_OK;
-        }
-        else
-        {
-            goto Finished;
-        }
-    }
-    else
-    {
-        DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO,
-            "REQUESTHANDLER_CONFIG::GetConfig, set config to ModuleContext");
-        // set appliction info here instead of inside Populate()
-        // as the destructor will delete the backend process
-        hr = pAspNetCoreConfig->QueryApplicationPath()->Copy(pHttpApplication->GetApplicationId());
-        if (FAILED(hr))
-        {
-            goto Finished;
-        }
+        goto Finished;
     }
 
-    *ppAspNetCoreConfig = pAspNetCoreConfig;
-    pAspNetCoreConfig = NULL;
+    *ppAspNetCoreConfig = pRequestHandlerConfig;
+    pRequestHandlerConfig = NULL;
 
 Finished:
 
-    if (pAspNetCoreConfig != NULL)
+    if (pRequestHandlerConfig != NULL)
     {
-        delete pAspNetCoreConfig;
-        pAspNetCoreConfig = NULL;
+        delete pRequestHandlerConfig;
+        pRequestHandlerConfig = NULL;
     }
 
     return hr;

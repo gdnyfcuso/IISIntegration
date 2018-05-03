@@ -1,4 +1,37 @@
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 #include "precomp.hxx"
+
+ASPNETCORE_SHIM_CONFIG::~ASPNETCORE_SHIM_CONFIG()
+{
+    if (m_ppStrArguments != NULL)
+    {
+        delete[] m_ppStrArguments;
+        m_ppStrArguments = NULL;
+    }
+}
+
+VOID
+ASPNETCORE_SHIM_CONFIG::ReferenceConfiguration(
+    VOID
+) const
+{
+    InterlockedIncrement(&m_cRefs);
+}
+
+VOID
+ASPNETCORE_SHIM_CONFIG::DereferenceConfiguration(
+    VOID
+) const
+{
+    DBG_ASSERT(m_cRefs != 0);
+    LONG cRefs = 0;
+    if ((cRefs = InterlockedDecrement(&m_cRefs)) == 0)
+    {
+        delete this;
+    }
+}
 
 HRESULT
 ASPNETCORE_SHIM_CONFIG::GetConfig(
@@ -127,6 +160,89 @@ ASPNETCORE_SHIM_CONFIG::Populate(
     IHttpContext   *pHttpContext
 )
 {
-    HRESULT hr = S_OK;
+    STACK_STRU(strHostingModel, 300);
+    HRESULT                         hr = S_OK;
+    STRU                            strApplicationFullPath;
+    IAppHostAdminManager           *pAdminManager = NULL;
+    IAppHostElement                *pAspNetCoreElement = NULL;
+    DWORD                           dwCounter = 0;
+    DWORD                           dwPosition = 0;
+    WCHAR*                          pszPath = NULL;
+
+    pAdminManager = pHttpServer->GetAdminManager();
+    hr = m_struConfigPath.Copy(pHttpContext->GetApplication()->GetAppConfigPath());
+    if (FAILED(hr))
+    {
+        goto Finished;
+    }
+
+    hr = m_struApplicationPhysicalPath.Copy(pHttpContext->GetApplication()->GetApplicationPhysicalPath());
+    if (FAILED(hr))
+    {
+        goto Finished;
+    }
+
+    pszPath = m_struConfigPath.QueryStr();
+    while (pszPath[dwPosition] != NULL)
+    {
+        if (pszPath[dwPosition] == '/')
+        {
+            dwCounter++;
+            if (dwCounter == 4)
+                break;
+        }
+        dwPosition++;
+    }
+
+    hr = GetElementStringProperty(pAspNetCoreElement,
+        CS_ASPNETCORE_PROCESS_EXE_PATH,
+        &m_struProcessPath);
+    if (FAILED(hr))
+    {
+        goto Finished;
+    }
+
+    hr = GetElementStringProperty(pAspNetCoreElement,
+        CS_ASPNETCORE_HOSTING_MODEL,
+        &strHostingModel);
+    if (FAILED(hr))
+    {
+        // Swallow this error for backward compatability
+        // Use default behavior for empty string
+        hr = S_OK;
+    }
+
+    if (strHostingModel.IsEmpty() || strHostingModel.Equals(L"outofprocess", TRUE))
+    {
+        m_hostingModel = HOSTING_OUT_PROCESS;
+    }
+    else if (strHostingModel.Equals(L"inprocess", TRUE))
+    {
+        m_hostingModel = HOSTING_IN_PROCESS;
+    }
+    else
+    {
+        // block unknown hosting value
+        hr = HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+        goto Finished;
+    }
+
+    hr = GetElementStringProperty(pAspNetCoreElement,
+        CS_ASPNETCORE_PROCESS_ARGUMENTS,
+        &m_struArguments);
+    if (FAILED(hr))
+    {
+        goto Finished;
+    }
+
+Finished:
+
+    if (pAspNetCoreElement != NULL)
+    {
+        pAspNetCoreElement->Release();
+        pAspNetCoreElement = NULL;
+    }
+
     return hr;
 }
+

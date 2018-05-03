@@ -50,7 +50,7 @@ enum APP_HOSTING_MODEL
     HOSTING_OUT_PROCESS
 };
 
-class REQUESTHANDLER_CONFIG : IHttpStoredContext
+class REQUESTHANDLER_CONFIG
 {
 public:
 
@@ -65,7 +65,7 @@ public:
 
     static
         HRESULT
-        GetConfig(
+        CreateRequestHandlerConfig(
             _In_  IHttpServer             *pHttpServer,
             _In_  HTTP_MODULE_ID           pModuleId,
             _In_  IHttpContext            *pHttpContext,

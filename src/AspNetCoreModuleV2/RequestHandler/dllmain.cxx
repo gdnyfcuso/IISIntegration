@@ -288,7 +288,7 @@ CreateApplication(
 
     if (pConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
     {
-        pApplication = new IN_PROCESS_APPLICATION(pServer, pConfig);
+        pApplication = new IN_PROCESS_APPLICATION(pServer);
         if (pApplication == NULL)
         {
             hr = HRESULT_FROM_WIN32(ERROR_OUTOFMEMORY);

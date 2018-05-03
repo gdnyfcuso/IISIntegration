@@ -10,9 +10,14 @@ typedef REQUEST_NOTIFICATION_STATUS(WINAPI * PFN_MANAGED_CONTEXT_HANDLER)(void *
 class IN_PROCESS_APPLICATION : public APPLICATION
 {
 public:
-    IN_PROCESS_APPLICATION(IHttpServer* pHttpServer, REQUESTHANDLER_CONFIG* pConfig);
+    IN_PROCESS_APPLICATION(IHttpServer* pHttpServer);
 
     ~IN_PROCESS_APPLICATION();
+
+	HRESULT
+	Initialize(
+		VOID
+	);
 
     __override
     VOID
@@ -166,7 +171,7 @@ private:
     DWORD                           m_dwStdErrReadTotal;
     static IN_PROCESS_APPLICATION*  s_Application;
 
-    REQUESTHANDLER_CONFIG*              m_pConfig;
+    REQUESTHANDLER_CONFIG*          m_pConfig;
 
     VOID
     SetStdOut(
