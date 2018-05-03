@@ -236,6 +236,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         async Task<Stream> IHttpUpgradeFeature.UpgradeAsync()
         {
+
             // TODO fix these exceptions strings
             if (!((IHttpUpgradeFeature)this).IsUpgradableRequest)
             {
@@ -250,16 +251,22 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             {
                 throw new InvalidOperationException("CoreStrings.UpgradeCannotBeCalledMultipleTimes");
             }
+
+            if (IO != null)
+            {
+                throw new InvalidOperationException("IO already started");
+            }
+
             _wasUpgraded = true;
 
             StatusCode = StatusCodes.Status101SwitchingProtocols;
             ReasonPhrase = ReasonPhrases.GetReasonPhrase(StatusCodes.Status101SwitchingProtocols);
-            _readWebSocketsOperation = new IISAwaitable();
-            _writeWebSocketsOperation = new IISAwaitable();
             NativeMethods.HttpEnableWebsockets(_pInProcessHandler);
 
             // Upgrade async will cause the stream processing to go into duplex mode
-            await UpgradeAsync();
+            var socketIO = new IISWebSocketsIO(_pInProcessHandler);
+            await socketIO.Initialize();
+            IO = socketIO;
 
             return new DuplexStream(RequestBody, ResponseBody);
         }

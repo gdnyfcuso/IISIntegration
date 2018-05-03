@@ -29,4 +29,8 @@
     <PackageReference Include="Microsoft.Extensions.SecurityHelper.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsSecurityHelperSourcesPackageVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Server\IO\" />
+  </ItemGroup>
+
 </Project>

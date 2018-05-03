@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpSys.Internal;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
@@ -33,7 +34,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         private readonly IISOptions _options;
 
-        private bool _reading; // To know whether we are currently in a read operation.
         private volatile bool _hasResponseStarted;
 
         private int _statusCode;
@@ -51,8 +51,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         private readonly IISHttpServer _server;
 
         private GCHandle _thisHandle;
-        private MemoryHandle _inputHandle;
-        private IISAwaitable _operation = new IISAwaitable();
         protected Task _processBodiesTask;
 
         protected int _requestAborted;
@@ -91,6 +89,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         public Stream ResponseBody { get; set; }
         public Pipe Input { get; set; }
         public OutputProducer Output { get; set; }
+        public IIISIO IO { get; set; }
 
         public IHeaderDictionary RequestHeaders { get; set; }
         public IHeaderDictionary ResponseHeaders { get; set; }
@@ -204,7 +203,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                 ThrowResponseAbortedException();
             }
 
-            await ProduceStart(appCompleted: false);
+            await ProduceStart();
         }
 
         private void ThrowResponseAbortedException()
@@ -212,7 +211,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             throw new ObjectDisposedException("Unhandled application exception", _applicationException);
         }
 
-        private async Task ProduceStart(bool appCompleted)
+        private async Task ProduceStart()
         {
             if (_hasResponseStarted)
             {
@@ -221,22 +220,11 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
             _hasResponseStarted = true;
 
-            SendResponseHeaders(appCompleted);
-
-            // On first flush for websockets, we need to flush the headers such that
-            // IIS will know that an upgrade occured.
-            // If we don't have anything on the Output pipe, the TryRead in ReadAndWriteLoopAsync
-            // will fail and we will signal the upgradeTcs that we are upgrading. However, we still
-            // didn't flush. To fix this, we flush 0 bytes right after writing the headers.
-            Task flushTask;
-            lock (_stateSync)
-            {
-                DisableReads();
-                flushTask = Output.FlushAsync();
-            }
-            await flushTask;
+            SetResponseHeaders();
 
             StartProcessingRequestAndResponseBody();
+
+            await IO.FlushAsync();
         }
 
         protected Task ProduceEnd()
@@ -282,20 +270,13 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
             _hasResponseStarted = true;
 
-            SendResponseHeaders(appCompleted: true);
+            SetResponseHeaders();
             StartProcessingRequestAndResponseBody();
 
-            Task flushAsync;
-
-            lock (_stateSync)
-            {
-                DisableReads();
-                flushAsync = Output.FlushAsync();
-            }
-            await flushAsync;
+            await IO.FlushAsync();
         }
 
-        public unsafe void SendResponseHeaders(bool appCompleted)
+        public unsafe void SetResponseHeaders()
         {
             // Verifies we have sent the statuscode before writing a header
             var reasonPhrase = string.IsNullOrEmpty(ReasonPhrase) ? ReasonPhrases.GetReasonPhrase(StatusCode) : ReasonPhrase;
@@ -439,7 +420,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         public void PostCompletion(NativeMethods.REQUEST_NOTIFICATION_STATUS requestNotificationStatus)
         {
-            Debug.Assert(!_operation.HasContinuation, "Pending async operation!");
+            IO.Stop();
 
             NativeMethods.HttpSetCompletionStatus(_pInProcessHandler, requestNotificationStatus);
             NativeMethods.HttpPostCompletion(_pInProcessHandler, 0);
@@ -450,18 +431,20 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             NativeMethods.HttpIndicateCompletion(_pInProcessHandler, notificationStatus);
         }
 
-        internal void OnAsyncCompletion(int hr, int cbBytes)
+        internal void OnAsyncCompletion(int hr, int bytes)
         {
+            IO.NotifyCompletion(hr, bytes);
+
             // Must acquire the _stateSync here as anytime we call complete, we need to hold the lock
             // to avoid races with cancellation.
-            Action continuation;
-            lock (_stateSync)
-            {
-                _reading = false;
-                continuation = _operation.GetCompletion(hr, cbBytes);
-            }
+            //Action continuation;
+            //lock (_stateSync)
+            //{
+            //    _reading = false;
+            //    continuation = _operation.GetCompletion(hr, cbBytes);
+            //}
 
-            continuation?.Invoke();
+            //continuation?.Invoke();
         }
 
         private bool disposedValue = false; // To detect redundant calls

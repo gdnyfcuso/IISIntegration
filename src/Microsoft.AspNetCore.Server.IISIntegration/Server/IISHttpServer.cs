@@ -11,12 +11,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
     internal class IISHttpServer : IServer
     {
+        public ILoggerFactory LoggerFactory { get; }
+
         private const string WebSocketVersionString = "WEBSOCKET_VERSION";
 
         private static NativeMethods.PFN_REQUEST_HANDLER _requestHandler = HandleRequest;
@@ -56,8 +59,9 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             return _websocketAvailable.Value;
         }
 
-        public IISHttpServer(IApplicationLifetime applicationLifetime, IAuthenticationSchemeProvider authentication, IOptions<IISOptions> options)
+        public IISHttpServer(IApplicationLifetime applicationLifetime, IAuthenticationSchemeProvider authentication, IOptions<IISOptions> options, ILoggerFactory loggerFactory)
         {
+            LoggerFactory = loggerFactory;
             _applicationLifetime = applicationLifetime;
             _authentication = authentication;
             _options = options.Value;

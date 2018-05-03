@@ -2,10 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Buffers;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.HttpSys.Internal;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
@@ -14,31 +11,92 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
     /// </summary>
     internal partial class IISHttpContext
     {
-        private bool _wasUpgraded; // Used for detecting repeated upgrades in IISHttpContext
-
-        private IISAwaitable _readWebSocketsOperation;
-        private IISAwaitable _writeWebSocketsOperation;
-        private TaskCompletionSource<object> _upgradeTcs;
+        private bool _wasUpgraded;
 
         private Task StartBidirectionalStream()
         {
             // IIS allows for websocket support and duplex channels only on Win8 and above
             // This allows us to have two tasks for reading the request and writing the response
-            var readWebsocketTask = ReadWebSockets();
-            var writeWebsocketTask = WriteWebSockets();
+            var readWebsocketTask = ReadBody();
+            var writeWebsocketTask = WriteBody();
             return Task.WhenAll(readWebsocketTask, writeWebsocketTask);
         }
 
-        public async Task UpgradeAsync()
+
+        private async Task ReadBody()
         {
-            if (_upgradeTcs == null)
+            try
             {
-                _upgradeTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-                // Flush any contents of the OutputPipe before upgrading to websockets.
-                await FlushAsync();
-                await _upgradeTcs.Task;
+                while (true)
+                {
+                    var memory = Input.Writer.GetMemory();
+
+                    var read = await IO.ReadAsync(memory);
+
+                    if (read == 0)
+                    {
+                        break;
+                    }
+
+                    Input.Writer.Advance(read);
+
+                    var result = await Input.Writer.FlushAsync();
+
+                    if (result.IsCompleted || result.IsCanceled)
+                    {
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Input.Writer.Complete(ex);
+            }
+            finally
+            {
+                Input.Writer.Complete();
             }
         }
+
+        private async Task WriteBody()
+        {
+            try
+            {
+                while (true)
+                {
+                    var result = await Output.Reader.ReadAsync();
+
+                    var buffer = result.Buffer;
+
+                    try
+                    {
+                        if (!buffer.IsEmpty)
+                        {
+                            await IO.WriteAsync(buffer);
+                        }
+                        else if (result.IsCompleted)
+                        {
+                            break;
+                        }
+                    }
+                    finally
+                    {
+                        Output.Reader.AdvanceTo(buffer.End);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Output.Reader.Complete(ex);
+            }
+            finally
+            {
+                Output.Reader.Complete();
+            }
+        }
+
+
+        /*
 
         private unsafe IISAwaitable ReadWebSocketsFromIISAsync(int length)
         {
@@ -144,82 +202,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         {
             _readWebSocketsOperation.Complete(hr, cbBytes);
         }
-
-        private async Task ReadWebSockets()
-        {
-            try
-            {
-                while (true)
-                {
-                    var memory = Input.Writer.GetMemory();
-                    _inputHandle = memory.Pin();
-
-                    try
-                    {
-                        int read = 0;
-                        read = await ReadWebSocketsFromIISAsync(memory.Length);
-
-                        if (read == 0)
-                        {
-                            break;
-                        }
-
-                        Input.Writer.Advance(read);
-                    }
-                    finally
-                    {
-                        _inputHandle.Dispose();
-                    }
-
-                    var result = await Input.Writer.FlushAsync();
-
-                    if (result.IsCompleted || result.IsCanceled)
-                    {
-                        break;
-                    }
-                }
-                Input.Writer.Complete();
-            }
-            catch (Exception ex)
-            {
-                Input.Writer.Complete(ex);
-            }
-        }
-
-        private async Task WriteWebSockets()
-        {
-            try
-            {
-                while (true)
-                {
-                    var result = await Output.Reader.ReadAsync();
-
-                    var buffer = result.Buffer;
-                    var consumed = buffer.End;
-
-                    try
-                    {
-                        if (!buffer.IsEmpty)
-                        {
-                            await WriteWebSocketsFromIISAsync(buffer);
-                        }
-                        else if (result.IsCompleted)
-                        {
-                            break;
-                        }
-                    }
-                    finally
-                    {
-                        Output.Reader.AdvanceTo(consumed);
-                    }
-                }
-
-                Output.Reader.Complete();
-            }
-            catch (Exception ex)
-            {
-                Output.Reader.Complete(ex);
-            }
-        }
+         */
     }
 }
