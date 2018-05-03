@@ -35,7 +35,7 @@ public:
         _Out_ IREQUEST_HANDLER   **pRequestHandler)
     override;
 
-    ASPNETCORE_CONFIG*
+    REQUESTHANDLER_CONFIG*
     QueryConfig()
     const;
 

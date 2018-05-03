@@ -137,7 +137,7 @@ REQUESTHANDLER_CONFIG::GetConfig(
     else
     {
         DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO,
-            "ASPNETCORE_CONFIG::GetConfig, set config to ModuleContext");
+            "REQUESTHANDLER_CONFIG::GetConfig, set config to ModuleContext");
         // set appliction info here instead of inside Populate()
         // as the destructor will delete the backend process
         hr = pAspNetCoreConfig->QueryApplicationPath()->Copy(pHttpApplication->GetApplicationId());

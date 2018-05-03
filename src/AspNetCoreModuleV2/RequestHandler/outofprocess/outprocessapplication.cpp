@@ -52,7 +52,7 @@ OUT_OF_PROCESS_APPLICATION::GetProcess(
     return m_pProcessManager->GetProcess(m_pConfig, ppServerProcess);
 }
 
-ASPNETCORE_CONFIG*
+REQUESTHANDLER_CONFIG*
 OUT_OF_PROCESS_APPLICATION::QueryConfig() const
 {
     return m_pConfig;

@@ -986,7 +986,7 @@ IN_PROCESS_APPLICATION::FilterException(unsigned int, struct _EXCEPTION_POINTERS
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
-ASPNETCORE_CONFIG*
+REQUESTHANDLER_CONFIG*
 IN_PROCESS_APPLICATION::QueryConfig() const
 {
     return m_pConfig;

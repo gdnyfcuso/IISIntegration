@@ -106,7 +106,7 @@ public:
         return s_Application;
     }
 
-    ASPNETCORE_CONFIG*
+    REQUESTHANDLER_CONFIG*
     QueryConfig() const;
 
 private:
@@ -166,7 +166,7 @@ private:
     DWORD                           m_dwStdErrReadTotal;
     static IN_PROCESS_APPLICATION*  s_Application;
 
-    ASPNETCORE_CONFIG*              m_pConfig;
+    REQUESTHANDLER_CONFIG*              m_pConfig;
 
     VOID
     SetStdOut(

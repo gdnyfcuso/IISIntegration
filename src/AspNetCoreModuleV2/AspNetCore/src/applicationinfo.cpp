@@ -42,7 +42,7 @@ APPLICATION_INFO::~APPLICATION_INFO()
 
 HRESULT
 APPLICATION_INFO::Initialize(
-    _In_ REQUESTHANDLER_CONFIG   *pConfiguration,
+    _In_ ASPNETCORE_SHIM_CONFIG   *pConfiguration,
     _In_ FILE_WATCHER        *pFileWatcher
 )
 {
@@ -222,7 +222,7 @@ APPLICATION_INFO::EnsureApplicationCreated()
                 goto Finished;
             }
 
-            hr = m_pfnAspNetCoreCreateApplication(m_pServer, m_pConfiguration, &pApplication);
+            hr = m_pfnAspNetCoreCreateApplication(m_pServer, &pApplication);
             if (FAILED(hr))
             {
                 goto Finished;

@@ -10,7 +10,6 @@ typedef
 HRESULT
 (WINAPI * PFN_ASPNETCORE_CREATE_APPLICATION)(
     _In_  IHttpServer        *pServer,
-    _In_  REQUESTHANDLER_CONFIG  *pConfig,
     _Out_ IAPPLICATION       **pApplication
     );
 
@@ -79,7 +78,7 @@ public:
 
     HRESULT
     Initialize(
-        _In_ REQUESTHANDLER_CONFIG   *pConfiguration,
+        _In_ ASPNETCORE_SHIM_CONFIG   *pConfiguration,
         _In_ FILE_WATCHER        *pFileWatcher
     );
 
@@ -115,7 +114,7 @@ public:
     HRESULT
     StartMonitoringAppOffline();
 
-    REQUESTHANDLER_CONFIG*
+    ASPNETCORE_SHIM_CONFIG*
     QueryConfig()
     {
         return m_pConfiguration;
@@ -159,8 +158,8 @@ private:
     BOOL                    m_fAppOfflineFound;
     APP_OFFLINE_HTM        *m_pAppOfflineHtm;
     FILE_WATCHER_ENTRY     *m_pFileWatcherEntry;
-    REQUESTHANDLER_CONFIG      *m_pConfiguration;
-    IAPPLICATION            *m_pApplication;
+    ASPNETCORE_SHIM_CONFIG *m_pConfiguration;
+    IAPPLICATION           *m_pApplication;
     SRWLOCK                 m_srwLock;
     IHttpServer            *m_pServer;
     PFN_ASPNETCORE_CREATE_APPLICATION      m_pfnAspNetCoreCreateApplication;

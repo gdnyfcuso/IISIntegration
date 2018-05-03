@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "stdafx.h"
+
 enum APPLICATION_STATUS
 {
     UNKNOWN = 0,
