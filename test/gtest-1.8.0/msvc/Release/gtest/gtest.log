@@ -1,3 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(376,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
-  gtest-all.cc
-  gtest.vcxproj -> C:\Users\jukotali\code\IISIntegration\test\gtest-1.8.0\msvc\Release\gtest.lib
