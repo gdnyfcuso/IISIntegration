@@ -2,7 +2,7 @@ using System;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
-    internal class IISAsyncFlushOperation: IISAsyncIOOperation
+    internal class AsyncFlushOperation: AsyncIOOperation
     {
         private IntPtr _requestHandler;
 

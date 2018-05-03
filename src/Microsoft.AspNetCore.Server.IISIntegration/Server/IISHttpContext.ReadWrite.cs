@@ -79,7 +79,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                 await InitializeResponseAwaited();
             }
 
-            await IO.FlushAsync();
+            await AsyncIO.FlushAsync();
         }
 
         private void StartProcessingRequestAndResponseBody()
@@ -91,9 +91,9 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                     if (_processBodiesTask == null)
                     {
                         // If at this point request was not upgraded just start a normal IO engine
-                        if (IO == null)
+                        if (AsyncIO == null)
                         {
-                            IO = new IISIO(_pInProcessHandler, _server.LoggerFactory.CreateLogger<IISIO>());
+                            AsyncIO = new IISIO(_pInProcessHandler, _server.LoggerFactory.CreateLogger<IISIO>());
                         }
 
                         _processBodiesTask = ConsumeAsync();

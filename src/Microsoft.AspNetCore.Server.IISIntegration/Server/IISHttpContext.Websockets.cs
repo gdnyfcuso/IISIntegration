@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                 {
                     var memory = Input.Writer.GetMemory();
 
-                    var read = await IO.ReadAsync(memory);
+                    var read = await AsyncIO.ReadAsync(memory);
 
                     if (read == 0)
                     {
@@ -72,7 +72,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                     {
                         if (!buffer.IsEmpty)
                         {
-                            await IO.WriteAsync(buffer);
+                            await AsyncIO.WriteAsync(buffer);
                         }
                         else if (result.IsCompleted)
                         {

@@ -89,7 +89,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         public Stream ResponseBody { get; set; }
         public Pipe Input { get; set; }
         public OutputProducer Output { get; set; }
-        public IIISIO IO { get; set; }
+        public IAsyncIOEngine AsyncIO { get; set; }
 
         public IHeaderDictionary RequestHeaders { get; set; }
         public IHeaderDictionary ResponseHeaders { get; set; }
@@ -224,7 +224,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
             StartProcessingRequestAndResponseBody();
 
-            await IO.FlushAsync();
+            await AsyncIO.FlushAsync();
         }
 
         protected Task ProduceEnd()
@@ -273,7 +273,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             SetResponseHeaders();
             StartProcessingRequestAndResponseBody();
 
-            await IO.FlushAsync();
+            await AsyncIO.FlushAsync();
         }
 
         public unsafe void SetResponseHeaders()
@@ -420,7 +420,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         public void PostCompletion(NativeMethods.REQUEST_NOTIFICATION_STATUS requestNotificationStatus)
         {
-            IO.Stop();
+            AsyncIO.Stop();
 
             NativeMethods.HttpSetCompletionStatus(_pInProcessHandler, requestNotificationStatus);
             NativeMethods.HttpPostCompletion(_pInProcessHandler, 0);
@@ -433,7 +433,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         internal void OnAsyncCompletion(int hr, int bytes)
         {
-            IO.NotifyCompletion(hr, bytes);
+            AsyncIO.NotifyCompletion(hr, bytes);
 
             // Must acquire the _stateSync here as anytime we call complete, we need to hold the lock
             // to avoid races with cancellation.

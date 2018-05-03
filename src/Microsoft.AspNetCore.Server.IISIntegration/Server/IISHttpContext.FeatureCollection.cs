@@ -252,7 +252,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                 throw new InvalidOperationException("CoreStrings.UpgradeCannotBeCalledMultipleTimes");
             }
 
-            if (IO != null)
+            if (AsyncIO != null)
             {
                 throw new InvalidOperationException("IO already started");
             }
@@ -264,9 +264,9 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             NativeMethods.HttpEnableWebsockets(_pInProcessHandler);
 
             // Upgrade async will cause the stream processing to go into duplex mode
-            var socketIO = new IISWebSocketsIO(_pInProcessHandler);
+            var socketIO = new WebSocketsAsyncIOEngine(_pInProcessHandler);
             await socketIO.Initialize();
-            IO = socketIO;
+            AsyncIO = socketIO;
 
             return new DuplexStream(RequestBody, ResponseBody);
         }

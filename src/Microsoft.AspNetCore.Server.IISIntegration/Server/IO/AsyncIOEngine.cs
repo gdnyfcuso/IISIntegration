@@ -7,22 +7,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
-    internal class IISIO : IIISIO
+    internal class AsyncIOEngine : IAsyncIOEngine
     {
         private readonly IntPtr _handler;
 
-        private readonly ILogger<IISIO> _logger;
+        private readonly ILogger<AsyncIOEngine> _logger;
 
-        public IISIO(IntPtr handler, ILogger<IISIO> logger)
+        public AsyncIOEngine(IntPtr handler, ILogger<AsyncIOEngine> logger)
         {
             _handler = handler;
             _logger = logger;
-            _operationQueue = new Queue<IISAsyncIOOperation>();
+            _operationQueue = new Queue<AsyncIOOperation>();
         }
 
-        private readonly Queue<IISAsyncIOOperation> _operationQueue;
+        private readonly Queue<AsyncIOOperation> _operationQueue;
 
-        private IISAsyncIOOperation _runningOperation;
+        private AsyncIOOperation _runningOperation;
 
         public ValueTask<int> ReadAsync(Memory<byte> memory)
         {
@@ -32,18 +32,18 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             return new ValueTask<int>(read, 0);
         }
 
-        private IISAsyncReadOperation GetReadOperation()
+        private AsyncReadOperation GetReadOperation()
         {
-            return new IISAsyncReadOperation();
+            return new AsyncReadOperation();
         }
 
-        private IISAsyncWriteOperation GetWriteOperation()
+        private AsyncWriteOperation GetWriteOperation()
         {
-            return new IISAsyncWriteOperation();
+            return new AsyncWriteOperation();
         }
-        private IISAsyncFlushOperation GetFlushOperation()
+        private AsyncFlushOperation GetFlushOperation()
         {
-            return new IISAsyncFlushOperation();
+            return new AsyncFlushOperation();
         }
         public ValueTask<int> WriteAsync(ReadOnlySequence<byte> data)
         {
@@ -54,7 +54,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             return new ValueTask<int>(write, 0);
         }
 
-        private void Run(IISAsyncIOOperation ioOperation)
+        private void Run(AsyncIOOperation ioOperation)
         {
             lock (_operationQueue)
             {
@@ -87,7 +87,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         {
             lock (_operationQueue)
             {
-                if (_runningOperation is IISAsyncReadOperation)
+                if (_runningOperation is AsyncReadOperation)
                 {
                     NativeMethods.HttpTryCancelIO(_handler);
                 }
@@ -104,7 +104,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         public void NotifyCompletion(int hr, int bytes)
         {
-            IISAsyncIOOperation.IISAsyncContinuation continuation;
+            AsyncIOOperation.IISAsyncContinuation continuation;
 
             lock (_operationQueue)
             {
@@ -129,7 +129,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         private bool RunNextOperation()
         {
-            IISAsyncIOOperation.IISAsyncContinuation? continuation = null;
+            AsyncIOOperation.IISAsyncContinuation? continuation = null;
 
             lock (_operationQueue)
             {

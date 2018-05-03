@@ -4,7 +4,7 @@ using System.Threading.Tasks.Sources;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
-    internal abstract class IISAsyncIOOperation: IValueTaskSource<int>, IValueTaskSource
+    internal abstract class AsyncIOOperation: IValueTaskSource<int>, IValueTaskSource
     {
         private Action<object> _continuation;
         private object _state;

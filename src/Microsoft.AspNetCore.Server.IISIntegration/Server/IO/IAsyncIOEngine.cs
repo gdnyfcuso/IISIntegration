@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
-    internal interface IIISIO
+    internal interface IAsyncIOEngine
     {
         ValueTask<int> ReadAsync(Memory<byte> memory);
         ValueTask<int> WriteAsync(ReadOnlySequence<byte> data);

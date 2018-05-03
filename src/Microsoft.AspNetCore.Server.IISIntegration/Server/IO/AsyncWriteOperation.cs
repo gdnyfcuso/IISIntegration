@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.HttpSys.Internal;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
 {
-    internal abstract class IISAsyncWriteOperationBase : IISAsyncIOOperation
+    internal abstract class AsyncWriteOperationBase : AsyncIOOperation
     {
         private const int HttpDataChunkStackLimit = 128; // 16 bytes per HTTP_DATA_CHUNK
 
@@ -116,7 +116,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         internal abstract unsafe int WriteChunks(IntPtr requestHandler, int nChunks, HttpApiTypes.HTTP_DATA_CHUNK* pDataChunks, out bool fCompletionExpected);
     }
 
-    internal class IISAsyncWriteOperation : IISAsyncWriteOperationBase
+    internal class AsyncWriteOperation : AsyncWriteOperationBase
     {
         internal override unsafe int WriteChunks(IntPtr requestHandler, int nChunks, HttpApiTypes.HTTP_DATA_CHUNK* pDataChunks, out bool fCompletionExpected)
         {
