@@ -13,14 +13,16 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         private readonly ILogger<AsyncIOEngine> _logger;
 
-        public AsyncIOEngine(IntPtr handler, ILogger<AsyncIOEngine> logger)
+        public AsyncIOEngine(IntPtr handler, ILoggerFactory loggerFactory)
         {
             _handler = handler;
-            _logger = logger;
-            _operationQueue = new Queue<AsyncIOOperation>();
+            _logger = loggerFactory.CreateLogger<AsyncIOEngine>();
+            _writeQueue = new Queue<AsyncIOOperation>();
+            _readQueue = new Queue<AsyncIOOperation>();
         }
 
-        private readonly Queue<AsyncIOOperation> _operationQueue;
+        private readonly Queue<AsyncIOOperation> _writeQueue;
+        private readonly Queue<AsyncIOOperation> _readQueue;
 
         private AsyncIOOperation _runningOperation;
 
@@ -32,19 +34,6 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             return new ValueTask<int>(read, 0);
         }
 
-        private AsyncReadOperation GetReadOperation()
-        {
-            return new AsyncReadOperation();
-        }
-
-        private AsyncWriteOperation GetWriteOperation()
-        {
-            return new AsyncWriteOperation();
-        }
-        private AsyncFlushOperation GetFlushOperation()
-        {
-            return new AsyncFlushOperation();
-        }
         public ValueTask<int> WriteAsync(ReadOnlySequence<byte> data)
         {
             var write = GetWriteOperation();
@@ -56,22 +45,23 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         private void Run(AsyncIOOperation ioOperation)
         {
-            lock (_operationQueue)
+            lock (_readQueue)
             {
                 if (_runningOperation != null)
                 {
-                    _operationQueue.Enqueue(ioOperation);
+                    Enqueue(ioOperation);
 
                     _logger.LogTrace("Operation {Operation} added to queue", ioOperation.GetType());
-
                 }
                 else
                 {
+                    // we are just starting operation so there would be no
+                    // continuation registered
                     var completed = ioOperation.Invoke() != null;
+
                     // operation went async
                     if (!completed)
                     {
-
                         _logger.LogTrace("Operation {Operation} went async", ioOperation.GetType());
                         _runningOperation = ioOperation;
                     }
@@ -83,9 +73,21 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             }
         }
 
+        private void Enqueue(AsyncIOOperation ioOperation)
+        {
+            if (ioOperation is AsyncReadOperation)
+            {
+                _readQueue.Enqueue(ioOperation);
+            }
+            else
+            {
+                _writeQueue.Enqueue(ioOperation);
+            }
+        }
+
         private void CancelPendingRead()
         {
-            lock (_operationQueue)
+            lock (_readQueue)
             {
                 if (_runningOperation is AsyncReadOperation)
                 {
@@ -106,7 +108,7 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         {
             AsyncIOOperation.IISAsyncContinuation continuation;
 
-            lock (_operationQueue)
+            lock (_readQueue)
             {
                 Debug.Assert(_runningOperation != null);
 
@@ -131,11 +133,11 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         {
             AsyncIOOperation.IISAsyncContinuation? continuation = null;
 
-            lock (_operationQueue)
+            lock (_readQueue)
             {
-                if (_operationQueue.Count > 0)
+                if (_readQueue.Count > 0)
                 {
-                    var ioOperation = _operationQueue.Dequeue();
+                    var ioOperation = _readQueue.Dequeue();
 
                     continuation = ioOperation.Invoke();
                     // operation went async
@@ -143,6 +145,10 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
                     {
                         _runningOperation = ioOperation;
                     }
+                }
+                else
+                {
+                    return false;
                 }
             }
 
@@ -152,13 +158,46 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         public void Stop()
         {
-            lock (_operationQueue)
+            lock (_readQueue)
             {
-                if (_runningOperation != null || _operationQueue.Count > 0)
+                if (_runningOperation != null || _readQueue.Count > 0)
                 {
                     throw new InvalidOperationException();
                 }
             }
+        }
+
+        private bool TryDequeue(out AsyncIOOperation ioOperation)
+        {
+            if (_readQueue?.Count > 0)
+            {
+                ioOperation = _readQueue.Dequeue();
+                return true;
+            }
+
+            if (_writeQueue?.Count > 0)
+            {
+                ioOperation = _writeQueue.Dequeue();
+                return true;
+            }
+
+            ioOperation = null;
+            return false;
+        }
+
+        protected virtual AsyncReadOperation GetReadOperation()
+        {
+            return new AsyncReadOperation();
+        }
+
+        protected virtual AsyncWriteOperation GetWriteOperation()
+        {
+            return new AsyncWriteOperation();
+        }
+
+        protected virtual AsyncFlushOperation GetFlushOperation()
+        {
+            return new AsyncFlushOperation();
         }
     }
 }
