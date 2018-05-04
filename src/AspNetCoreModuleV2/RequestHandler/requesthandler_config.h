@@ -64,204 +64,204 @@ public:
     }
 
     static
-        HRESULT
-        CreateRequestHandlerConfig(
-            _In_  IHttpServer             *pHttpServer,
-            _In_  IHttpContext            *pHttpContext,
-            _In_  HANDLE                   hEventLog,
-            _Out_ REQUESTHANDLER_CONFIG       **ppAspNetCoreConfig
-        );
+    HRESULT
+    CreateRequestHandlerConfig(
+        _In_  IHttpServer             *pHttpServer,
+        _In_  IHttpContext            *pHttpContext,
+        _In_  HANDLE                   hEventLog,
+        _Out_ REQUESTHANDLER_CONFIG       **ppAspNetCoreConfig
+    );
 
     ENVIRONMENT_VAR_HASH*
-        QueryEnvironmentVariables(
-            VOID
-        )
+    QueryEnvironmentVariables(
+        VOID
+    )
     {
         return m_pEnvironmentVariables;
     }
 
     DWORD
-        QueryRapidFailsPerMinute(
-            VOID
-        )
+    QueryRapidFailsPerMinute(
+        VOID
+    )
     {
         return m_dwRapidFailsPerMinute;
     }
 
     DWORD
-        QueryStartupTimeLimitInMS(
-            VOID
-        )
+    QueryStartupTimeLimitInMS(
+        VOID
+    )
     {
         return m_dwStartupTimeLimitInMS;
     }
 
     DWORD
-        QueryShutdownTimeLimitInMS(
-            VOID
-        )
+    QueryShutdownTimeLimitInMS(
+        VOID
+    )
     {
         return m_dwShutdownTimeLimitInMS;
     }
 
     DWORD
-        QueryProcessesPerApplication(
-            VOID
-        )
+    QueryProcessesPerApplication(
+        VOID
+    )
     {
         return m_dwProcessesPerApplication;
     }
 
     DWORD
-        QueryRequestTimeoutInMS(
-            VOID
-        )
+    QueryRequestTimeoutInMS(
+        VOID
+    )
     {
         return m_dwRequestTimeoutInMS;
     }
 
     STRU*
-        QueryArguments(
-            VOID
-        )
+    QueryArguments(
+        VOID
+    )
     {
         return &m_struArguments;
     }
 
     STRU*
-        QueryApplicationPath(
-            VOID
-        )
+    QueryApplicationPath(
+        VOID
+    )
     {
         return &m_struApplication;
     }
 
     STRU*
-        QueryApplicationPhysicalPath(
-            VOID
-        )
+    QueryApplicationPhysicalPath(
+        VOID
+    )
     {
         return &m_struApplicationPhysicalPath;
     }
 
     STRU*
-        QueryApplicationVirtualPath(
-            VOID
-        )
+    QueryApplicationVirtualPath(
+        VOID
+    )
     {
         return &m_struApplicationVirtualPath;
     }
 
     STRU*
-        QueryProcessPath(
-            VOID
-        )
+    QueryProcessPath(
+        VOID
+    )
     {
         return &m_struProcessPath;
     }
 
     APP_HOSTING_MODEL
-        QueryHostingModel(
-            VOID
-        )
+    QueryHostingModel(
+        VOID
+    )
     {
         return m_hostingModel;
     }
 
     BOOL
-        QueryStdoutLogEnabled()
+    QueryStdoutLogEnabled()
     {
         return m_fStdoutLogEnabled;
     }
 
     BOOL
-        QueryWebSocketEnabled()
+    QueryWebSocketEnabled()
     {
         return m_fWebSocketEnabled;
     }
 
     BOOL
-        QueryForwardWindowsAuthToken()
+    QueryForwardWindowsAuthToken()
     {
         return m_fForwardWindowsAuthToken;
     }
 
     BOOL
-        QueryWindowsAuthEnabled()
+    QueryWindowsAuthEnabled()
     {
         return m_fWindowsAuthEnabled;
     }
 
     BOOL
-        QueryBasicAuthEnabled()
+    QueryBasicAuthEnabled()
     {
         return m_fBasicAuthEnabled;
     }
 
     BOOL
-        QueryAnonymousAuthEnabled()
+    QueryAnonymousAuthEnabled()
     {
         return m_fAnonymousAuthEnabled;
     }
 
     BOOL
-        QueryDisableStartUpErrorPage()
+    QueryDisableStartUpErrorPage()
     {
         return m_fDisableStartUpErrorPage;
     }
 
     STRU*
-        QueryStdoutLogFile()
+    QueryStdoutLogFile()
     {
         return &m_struStdoutLogFile;
     }
 
     STRU*
-        QueryConfigPath()
+    QueryConfigPath()
     {
         return &m_struConfigPath;
     }
 
     CONST
-        PCWSTR*
-        QueryHostFxrArguments(
-            VOID
-        )
+    PCWSTR*
+    QueryHostFxrArguments(
+        VOID
+    )
     {
         return m_ppStrArguments;
     }
 
     CONST
-        DWORD
-        QueryHostFxrArgCount(
-            VOID
-        )
+    DWORD
+    QueryHostFxrArgCount(
+        VOID
+    )
     {
         return m_dwArgc;
     }
 
     CONST
-        PCWSTR
-        QueryHostFxrFullPath(
-            VOID
-        )
+    PCWSTR
+    QueryHostFxrFullPath(
+        VOID
+    )
     {
         return m_struHostFxrLocation.QueryStr();
     }
 
     HRESULT
-        SetHostFxrFullPath(
-            PCWSTR pStrHostFxrFullPath
-        )
+    SetHostFxrFullPath(
+        PCWSTR pStrHostFxrFullPath
+    )
     {
         return m_struHostFxrLocation.Copy(pStrHostFxrFullPath);
     }
 
     VOID
-        SetHostFxrArguments(
-            DWORD dwArgc,
-            PWSTR* ppStrArguments
-        )
+    SetHostFxrArguments(
+        DWORD dwArgc,
+        PWSTR* ppStrArguments
+    )
     {
         if (m_ppStrArguments != NULL)
         {
@@ -273,14 +273,14 @@ public:
     }
 
     VOID
-        ReferenceConfiguration(
-            VOID
-        ) const;
+    ReferenceConfiguration(
+        VOID
+    ) const;
 
     VOID
-        DereferenceConfiguration(
-            VOID
-        ) const;
+    DereferenceConfiguration(
+        VOID
+    ) const;
 
 private:
 
@@ -297,10 +297,10 @@ private:
     }
 
     HRESULT
-        Populate(
-            IHttpServer  *pHttpServer,
-            IHttpContext *pHttpContext
-        );
+    Populate(
+        IHttpServer  *pHttpServer,
+        IHttpContext *pHttpContext
+    );
 
     mutable LONG           m_cRefs;
 
