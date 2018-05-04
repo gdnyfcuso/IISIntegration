@@ -37,13 +37,12 @@ HRESULT
 ASPNETCORE_SHIM_CONFIG::GetConfig(
     _In_  IHttpServer             *pHttpServer,
     _In_  HTTP_MODULE_ID           pModuleId,
-    _In_  IHttpContext            *pHttpContext,
+    _In_  IHttpApplication        *pHttpApplication,
     _In_  HANDLE                   hEventLog,
     _Out_ ASPNETCORE_SHIM_CONFIG **ppAspNetCoreShimConfig
 )
 {
     HRESULT                 hr = S_OK;
-    IHttpApplication       *pHttpApplication = pHttpContext->GetApplication();
     ASPNETCORE_SHIM_CONFIG *pAspNetCoreShimConfig = NULL;
     STRU                    struHostFxrDllLocation;
     PWSTR*                  pwzArgv;
@@ -75,7 +74,7 @@ ASPNETCORE_SHIM_CONFIG::GetConfig(
         goto Finished;
     }
 
-    hr = pAspNetCoreShimConfig->Populate(pHttpServer, pHttpContext);
+    hr = pAspNetCoreShimConfig->Populate(pHttpServer, pHttpApplication);
     if (FAILED(hr))
     {
         goto Finished;
@@ -158,7 +157,7 @@ Finished:
 HRESULT
 ASPNETCORE_SHIM_CONFIG::Populate(
     IHttpServer    *pHttpServer,
-    IHttpContext   *pHttpContext
+    IHttpApplication * pHttpApplication
 )
 {
     STACK_STRU(strHostingModel, 300);
@@ -172,13 +171,13 @@ ASPNETCORE_SHIM_CONFIG::Populate(
     BSTR                            bstrAspNetCoreSection = NULL;
 
     pAdminManager = pHttpServer->GetAdminManager();
-    hr = m_struConfigPath.Copy(pHttpContext->GetApplication()->GetAppConfigPath());
+    hr = m_struConfigPath.Copy(pHttpApplication->GetAppConfigPath());
     if (FAILED(hr))
     {
         goto Finished;
     }
 
-    hr = m_struApplicationPhysicalPath.Copy(pHttpContext->GetApplication()->GetApplicationPhysicalPath());
+    hr = m_struApplicationPhysicalPath.Copy(pHttpApplication->GetApplicationPhysicalPath());
     if (FAILED(hr))
     {
         goto Finished;
