@@ -81,7 +81,7 @@ ASPNETCORE_SHIM_CONFIG::GetConfig(
         goto Finished;
     }
 
-    // Modify config for inprocess.
+    // Modify config for inprocess.'
     // TODO remove this 
     if (pAspNetCoreShimConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
     {
@@ -168,6 +168,7 @@ ASPNETCORE_SHIM_CONFIG::Populate(
     DWORD                           dwCounter = 0;
     DWORD                           dwPosition = 0;
     WCHAR*                          pszPath = NULL;
+    BSTR                            bstrAspNetCoreSection = NULL;
 
     pAdminManager = pHttpServer->GetAdminManager();
     hr = m_struConfigPath.Copy(pHttpContext->GetApplication()->GetAppConfigPath());
@@ -192,6 +193,16 @@ ASPNETCORE_SHIM_CONFIG::Populate(
                 break;
         }
         dwPosition++;
+    }
+
+    bstrAspNetCoreSection = SysAllocString(CS_ASPNETCORE_SECTION);
+
+    hr = pAdminManager->GetAdminSection(bstrAspNetCoreSection,
+        m_struConfigPath.QueryStr(),
+        &pAspNetCoreElement);
+    if (FAILED(hr))
+    {
+        goto Finished;
     }
 
     hr = GetElementStringProperty(pAspNetCoreElement,
