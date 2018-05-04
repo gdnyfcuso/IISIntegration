@@ -177,7 +177,9 @@ APPLICATION_INFO::UpdateAppOfflineFileHandle()
 }
 
 HRESULT
-APPLICATION_INFO::EnsureApplicationCreated(IHttpContext *pHttpContext)
+APPLICATION_INFO::EnsureApplicationCreated(
+    IHttpContext *pHttpContext
+)
 {
     HRESULT             hr = S_OK;
     BOOL                fLocked = FALSE;

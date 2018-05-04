@@ -130,6 +130,7 @@ ASPNETCORE_SHIM_CONFIG::GetConfig(
     {
         DebugPrintf(ASPNETCORE_DEBUG_FLAG_INFO,
             "ASPNETCORE_SHIM_CONFIG::GetConfig, set config to ModuleContext");
+
         // set appliction info here instead of inside Populate()
         // as the destructor will delete the backend process
         hr = pAspNetCoreShimConfig->QueryApplicationPath()->Copy(pHttpApplication->GetApplicationId());

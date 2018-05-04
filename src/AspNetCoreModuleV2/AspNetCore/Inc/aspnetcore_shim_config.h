@@ -36,21 +36,21 @@ public:
         IHttpContext   *pHttpContext
     );
 
-	VOID
-	ReferenceConfiguration(
-		VOID
-	) const;
+    VOID
+    ReferenceConfiguration(
+        VOID
+    ) const;
 
-	VOID
-	DereferenceConfiguration(
-		VOID
-	) const;
+    VOID
+    DereferenceConfiguration(
+	    VOID
+    ) const;
 
 
     VOID
     CleanupStoredContext(
-	    VOID
-	)
+        VOID
+    )
     {
         DereferenceConfiguration();
     }
@@ -91,8 +91,8 @@ public:
 
     STRU*
     QueryConfigPath(
-	    VOID
-	)
+        VOID
+    )
     {
         return &m_struConfigPath;
     }
@@ -121,37 +121,37 @@ public:
         return m_struHostFxrLocation.Copy(pStrHostFxrFullPath);
     }
 
-	APP_HOSTING_MODEL
-	QueryHostingModel(
-		VOID
-	)
-	{
-		return m_hostingModel;
-	}
+    APP_HOSTING_MODEL
+    QueryHostingModel(
+        VOID
+    )
+    {
+        return m_hostingModel;
+    }
 
-	CONST
-	PCWSTR
-	QueryHostFxrFullPath(
-		VOID
-	)
-	{
-		return m_struHostFxrLocation.QueryStr();
-	}
+    CONST
+    PCWSTR
+    QueryHostFxrFullPath(
+        VOID
+    )
+    {
+        return m_struHostFxrLocation.QueryStr();
+    }
 
-	VOID
-	SetHostFxrArguments(
-		DWORD dwArgc,
-		PWSTR* ppStrArguments
-	)
-	{
-		if (m_ppStrArguments != NULL)
-		{
-			delete[] m_ppStrArguments;
-		}
+        VOID
+    SetHostFxrArguments(
+    DWORD dwArgc,
+    PWSTR* ppStrArguments
+    )
+    {
+        if (m_ppStrArguments != NULL)
+        {
+	        delete[] m_ppStrArguments;
+        }
 
-		m_dwArgc = dwArgc;
-		m_ppStrArguments = ppStrArguments;
-	}
+        m_dwArgc = dwArgc;
+        m_ppStrArguments = ppStrArguments;
+    }
 
 private:
     ASPNETCORE_SHIM_CONFIG() :
