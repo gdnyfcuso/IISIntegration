@@ -3,7 +3,6 @@
 
 #pragma once
 
-class IREQUEST_HANDLER;
 enum APPLICATION_STATUS
 {
     UNKNOWN = 0,

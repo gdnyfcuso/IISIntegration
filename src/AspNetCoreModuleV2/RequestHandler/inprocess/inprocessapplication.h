@@ -14,7 +14,7 @@ public:
 
     ~IN_PROCESS_APPLICATION();
 
-	HRESULT
+    HRESULT
 	Initialize(
 		VOID
 	);

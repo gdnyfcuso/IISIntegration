@@ -138,10 +138,10 @@ public:
         return m_struHostFxrLocation.QueryStr();
     }
 
-        VOID
+    VOID
     SetHostFxrArguments(
-    DWORD dwArgc,
-    PWSTR* ppStrArguments
+        DWORD dwArgc,
+        PWSTR* ppStrArguments
     )
     {
         if (m_ppStrArguments != NULL)

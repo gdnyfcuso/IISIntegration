@@ -276,7 +276,7 @@ HRESULT
 __stdcall
 CreateApplication(
     _In_  IHttpServer        *pServer,
-    _In_  IHttpContext       *pHttpContext,
+    _In_  IHttpApplication   *pHttpApplication,
     _Out_ IAPPLICATION       **ppApplication
 )
 {
@@ -287,7 +287,12 @@ CreateApplication(
     // Initialze some global variables here
     InitializeGlobalConfiguration(pServer);
 
-    hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpContext, g_hEventLog, &pConfig);
+    hr = REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(pServer, pHttpApplication, g_hEventLog, &pConfig);
+
+    if (FAILED(hr))
+    {
+        goto Finished;
+    }
 
     if (pConfig->QueryHostingModel() == APP_HOSTING_MODEL::HOSTING_IN_PROCESS)
     {

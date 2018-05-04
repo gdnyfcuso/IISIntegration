@@ -24,13 +24,12 @@ REQUESTHANDLER_CONFIG::~REQUESTHANDLER_CONFIG()
 HRESULT
 REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(
     _In_  IHttpServer             *pHttpServer,
-    _In_  IHttpContext            *pHttpContext,
+    _In_  IHttpApplication        *pHttpApplication,
     _In_  HANDLE                   hEventLog,
     _Out_ REQUESTHANDLER_CONFIG  **ppAspNetCoreConfig
 )
 {
     HRESULT                 hr = S_OK;
-    IHttpApplication       *pHttpApplication = pHttpContext->GetApplication();
     REQUESTHANDLER_CONFIG   *pRequestHandlerConfig = NULL;
     STRU                    struHostFxrDllLocation;
     PWSTR*                  pwzArgv;
@@ -51,7 +50,7 @@ REQUESTHANDLER_CONFIG::CreateRequestHandlerConfig(
         goto Finished;
     }
 
-    hr = pRequestHandlerConfig->Populate(pHttpServer, pHttpContext);
+    hr = pRequestHandlerConfig->Populate(pHttpServer, pHttpApplication);
     if (FAILED(hr))
     {
         goto Finished;
@@ -106,8 +105,8 @@ Finished:
 
 HRESULT
 REQUESTHANDLER_CONFIG::Populate(
-    IHttpServer    *pHttpServer,
-    IHttpContext   *pHttpContext
+    IHttpServer        *pHttpServer,
+    IHttpApplication   *pHttpApplication
 )
 {
     STACK_STRU(strHostingModel, 300);
@@ -151,13 +150,13 @@ REQUESTHANDLER_CONFIG::Populate(
     }
 
     pAdminManager = pHttpServer->GetAdminManager();
-    hr = m_struConfigPath.Copy(pHttpContext->GetApplication()->GetAppConfigPath());
+    hr = m_struConfigPath.Copy(pHttpApplication->GetAppConfigPath());
     if (FAILED(hr))
     {
         goto Finished;
     }
 
-    hr = m_struApplicationPhysicalPath.Copy(pHttpContext->GetApplication()->GetApplicationPhysicalPath());
+    hr = m_struApplicationPhysicalPath.Copy(pHttpApplication->GetApplicationPhysicalPath());
     if (FAILED(hr))
     {
         goto Finished;

@@ -67,9 +67,9 @@ public:
     HRESULT
     CreateRequestHandlerConfig(
         _In_  IHttpServer             *pHttpServer,
-        _In_  IHttpContext            *pHttpContext,
+        _In_  IHttpApplication            *pHttpContext,
         _In_  HANDLE                   hEventLog,
-        _Out_ REQUESTHANDLER_CONFIG       **ppAspNetCoreConfig
+        _Out_ REQUESTHANDLER_CONFIG  **ppAspNetCoreConfig
     );
 
     ENVIRONMENT_VAR_HASH*
@@ -272,16 +272,6 @@ public:
         m_ppStrArguments = ppStrArguments;
     }
 
-    VOID
-    ReferenceConfiguration(
-        VOID
-    ) const;
-
-    VOID
-    DereferenceConfiguration(
-        VOID
-    ) const;
-
 private:
 
     //
@@ -298,8 +288,8 @@ private:
 
     HRESULT
     Populate(
-        IHttpServer  *pHttpServer,
-        IHttpContext *pHttpContext
+        IHttpServer      *pHttpServer,
+        IHttpApplication *pHttpContext
     );
 
     mutable LONG           m_cRefs;

@@ -1006,11 +1006,6 @@ IN_PROCESS_APPLICATION::CreateHandler(
     HRESULT hr = S_OK;
     IREQUEST_HANDLER* pHandler = NULL;
 
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
     pHandler = new IN_PROCESS_HANDLER(pHttpContext, this);
 
     if (pHandler == NULL)
