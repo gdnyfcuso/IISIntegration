@@ -23,6 +23,7 @@
     <PackageReference Include="Microsoft.AspNetCore.HttpOverrides" Version="$(MicrosoftAspNetCoreHttpOverridesPackageVersion)" />
     <PackageReference Include="Microsoft.AspNetCore.HttpSys.Sources" PrivateAssets="All" Version="$(MicrosoftAspNetCoreHttpSysSourcesPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Buffers.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsBuffersSourcesPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Buffers.MemoryPool.Sources" Version="$(MicrosoftExtensionsBuffersMemoryPoolSourcesPackageVersion)" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsOptionsPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.SecurityHelper.Sources" PrivateAssets="All" Version="$(MicrosoftExtensionsSecurityHelperSourcesPackageVersion)" />
