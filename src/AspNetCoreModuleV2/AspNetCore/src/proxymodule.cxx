@@ -46,7 +46,7 @@ Return value:
     WEBSOCKET_HANDLER::StaticTerminate();*/
 
     ALLOC_CACHE_HANDLER::StaticTerminate();
-
+        
     delete this;
 }
 

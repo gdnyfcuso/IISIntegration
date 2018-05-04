@@ -21,7 +21,7 @@ IHttpServer *       g_pHttpServer = NULL;
 HINSTANCE           g_hWinHttpModule;
 HINSTANCE           g_hAspNetCoreModule;
 HANDLE              g_hEventLog = NULL;
-
+PCSTR               g_szDebugLabel = "ASPNET_CORE_MODULE_REQUEST_HANDLER";
 
 VOID
 InitializeGlobalConfiguration(
