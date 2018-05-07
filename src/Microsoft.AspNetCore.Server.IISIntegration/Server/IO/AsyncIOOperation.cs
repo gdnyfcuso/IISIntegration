@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Sources;
 
 namespace Microsoft.AspNetCore.Server.IISIntegration
@@ -110,7 +112,13 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
             public void Invoke()
             {
-                Continuation?.Invoke(State);
+                if (Continuation != null)
+                {
+                    // TODO: use generic overload when code moved to be netcoreapp only
+                    var continuation = Continuation;
+                    var state = State;
+                    ThreadPool.QueueUserWorkItem(_ => continuation(state));
+                }
             }
         }
     }

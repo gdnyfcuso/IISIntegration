@@ -17,13 +17,10 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         {
             _handler = handler;
             _logger = loggerFactory.CreateLogger<AsyncIOEngine>();
-            _writeQueue = new Queue<AsyncIOOperation>();
-            _readQueue = new Queue<AsyncIOOperation>();
         }
 
-        private readonly Queue<AsyncIOOperation> _writeQueue;
-        private readonly Queue<AsyncIOOperation> _readQueue;
-
+        private object _syncRoot = new object();
+        private AsyncIOOperation _nextOperation;
         private AsyncIOOperation _runningOperation;
 
         public ValueTask<int> ReadAsync(Memory<byte> memory)
@@ -45,13 +42,19 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
 
         private void Run(AsyncIOOperation ioOperation)
         {
-            lock (_readQueue)
+            lock (_syncRoot)
             {
                 if (_runningOperation != null)
                 {
-                    Enqueue(ioOperation);
-
-                    _logger.LogTrace("Operation {Operation} added to queue", ioOperation.GetType());
+                    if (_nextOperation == null)
+                    {
+                        _logger.LogTrace("Operation {Operation} added to queue", ioOperation.GetType());
+                        _nextOperation = ioOperation;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Only one queued operation is allowed");
+                    }
                 }
                 else
                 {
@@ -73,21 +76,9 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
             }
         }
 
-        private void Enqueue(AsyncIOOperation ioOperation)
-        {
-            if (ioOperation is AsyncReadOperation)
-            {
-                _readQueue.Enqueue(ioOperation);
-            }
-            else
-            {
-                _writeQueue.Enqueue(ioOperation);
-            }
-        }
-
         private void CancelPendingRead()
         {
-            lock (_readQueue)
+            lock (_syncRoot)
             {
                 if (_runningOperation is AsyncReadOperation)
                 {
@@ -107,82 +98,50 @@ namespace Microsoft.AspNetCore.Server.IISIntegration
         public void NotifyCompletion(int hr, int bytes)
         {
             AsyncIOOperation.IISAsyncContinuation continuation;
+            AsyncIOOperation.IISAsyncContinuation? nextContinuation = null;
 
-            lock (_readQueue)
+            lock (_syncRoot)
             {
                 Debug.Assert(_runningOperation != null);
 
                 _logger.LogTrace("Got notify completion for {Operation}", _runningOperation.GetType());
 
                 continuation = _runningOperation.NotifyCompletion(hr, bytes);
+
+                var next = _nextOperation;
+                _nextOperation = null;
+                _runningOperation = null;
+
+                if (next != null)
+                {
+                    nextContinuation = next.Invoke();
+
+                    // operation went async
+                    if (nextContinuation == null)
+                    {
+                        _logger.LogTrace("Next operation {Operation} went async", next.GetType());
+                        _runningOperation = next;
+                    }
+                    else
+                    {
+                        _logger.LogTrace("Next operation {Operation} competed synchronously", next.GetType());
+                    }
+                }
             }
 
             continuation.Invoke();
-
-            DrainQueue();
-        }
-
-        private void DrainQueue()
-        {
-            while (RunNextOperation())
-            {
-            }
-        }
-
-        private bool RunNextOperation()
-        {
-            AsyncIOOperation.IISAsyncContinuation? continuation = null;
-
-            lock (_readQueue)
-            {
-                if (_readQueue.Count > 0)
-                {
-                    var ioOperation = _readQueue.Dequeue();
-
-                    continuation = ioOperation.Invoke();
-                    // operation went async
-                    if (continuation == null)
-                    {
-                        _runningOperation = ioOperation;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            continuation?.Invoke();
-            return continuation != null;
+            nextContinuation?.Invoke();
         }
 
         public void Stop()
         {
-            lock (_readQueue)
+            lock (_syncRoot)
             {
-                if (_runningOperation != null || _readQueue.Count > 0)
+                if (_runningOperation != null || _nextOperation != null)
                 {
                     throw new InvalidOperationException();
                 }
             }
-        }
-
-        private bool TryDequeue(out AsyncIOOperation ioOperation)
-        {
-            if (_readQueue?.Count > 0)
-            {
-                ioOperation = _readQueue.Dequeue();
-                return true;
-            }
-
-            if (_writeQueue?.Count > 0)
-            {
-                ioOperation = _writeQueue.Dequeue();
-                return true;
-            }
-
-            ioOperation = null;
-            return false;
         }
 
         protected virtual AsyncReadOperation GetReadOperation()
